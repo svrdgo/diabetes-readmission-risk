@@ -265,6 +265,11 @@ def split_scale_oversample(df: pd.DataFrame):
     X_train[NUMERICAL_COLUMNS] = scaler.fit_transform(X_train[NUMERICAL_COLUMNS])
     X_test[NUMERICAL_COLUMNS] = scaler.transform(X_test[NUMERICAL_COLUMNS])
 
+    # Save pre-SMOTE split so models can apply SMOTE inside CV folds (no leakage)
+    os.makedirs(DATA_DIR, exist_ok=True)
+    X_train.to_csv(f"{DATA_DIR}X_train_raw.csv", index=False)
+    pd.Series(y_train, name="readmitted").to_csv(f"{DATA_DIR}y_train_raw.csv", index=False)
+
     print(f"  Before SMOTE — train class balance: {y_train.value_counts().to_dict()}")
     smote = SMOTE(random_state=RANDOM_STATE)
     X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
@@ -272,7 +277,6 @@ def split_scale_oversample(df: pd.DataFrame):
         f"  After  SMOTE — train class balance: {pd.Series(y_train_res).value_counts().to_dict()}"
     )
 
-    os.makedirs(DATA_DIR, exist_ok=True)
     X_train_res.to_csv(f"{DATA_DIR}X_train.csv", index=False)
     X_test.to_csv(f"{DATA_DIR}X_test.csv", index=False)
     pd.Series(y_train_res, name="readmitted").to_csv(
@@ -280,7 +284,7 @@ def split_scale_oversample(df: pd.DataFrame):
     )
     pd.Series(y_test, name="readmitted").to_csv(f"{DATA_DIR}y_test.csv", index=False)
 
-    print(f"  Saved: X_train {X_train_res.shape}, X_test {X_test.shape}")
+    print(f"  Saved: X_train_raw {X_train.shape}, X_train {X_train_res.shape}, X_test {X_test.shape}")
     return X_train_res, X_test, y_train_res, y_test
 
 
@@ -290,8 +294,14 @@ def split_scale_oversample(df: pd.DataFrame):
 
 
 def main():
-    print("[1/7] Downloading dataset...")
-    df = download_dataset()
+    raw_path = f"{DATA_DIR}diabetes_raw.csv"
+    if os.path.exists(raw_path):
+        print("[1/7] Loading cached dataset...")
+        df = pd.read_csv(raw_path)
+        print(f"  Loaded: {df.shape[0]:,} rows × {df.shape[1]} columns")
+    else:
+        print("[1/7] Downloading dataset...")
+        df = download_dataset()
 
     print("[2/7] Deduplicating patients...")
     df = deduplicate_patients(df)
