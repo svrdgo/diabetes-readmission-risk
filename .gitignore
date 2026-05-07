@@ -1,2 +1,9 @@
 .venv/
+venv/
 data/
+models/
+reports/
+.DS_Store
+__pycache__/
+.ipynb_checkpoints/
+*.egg-info/
