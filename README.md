@@ -80,7 +80,7 @@ estimates, then applies it once to the test set.
 
 | Model | AUC-ROC | Recall | Precision | F1 |
 |---|---|---|---|---|
-| Linear LR, threshold 0.5 (flawed SMOTE) | — | 0.03 | 0.28 | 0.07 |
+| Linear LR, threshold 0.5 (flawed SMOTE) | - | 0.03 | 0.28 | 0.07 |
 | Linear LR, threshold 0.5 (fixed pipeline) | 0.58 | 0.05 | 0.23 | 0.08 |
 | Linear LR, OOF threshold 0.34 | 0.58 | 0.23 | 0.15 | 0.18 |
 | Kernel LR (γ=0.001, 100 components), threshold 0.5 | 0.60 | 0.38 | 0.13 | 0.19 |

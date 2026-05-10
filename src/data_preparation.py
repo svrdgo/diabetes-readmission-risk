@@ -83,7 +83,7 @@ AGE_ORDER = [
 
 
 # ---------------------------------------------------------------------------
-# Step 1 — Download
+# Step 1: Download
 # ---------------------------------------------------------------------------
 
 
@@ -103,7 +103,7 @@ def download_dataset() -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Step 2 — Deduplicate patients
+# Step 2: Deduplicate patients
 # ---------------------------------------------------------------------------
 
 
@@ -120,19 +120,19 @@ def deduplicate_patients(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Step 3 — Feature selection
+# Step 3: Feature selection
 # ---------------------------------------------------------------------------
 
 
 def select_features(df: pd.DataFrame) -> pd.DataFrame:
-    # weight is >50% missing and not in SELECTED_COLUMNS — implicitly dropped here
+    # weight is >50% missing and not in SELECTED_COLUMNS —> implicitly dropped here
     df = df[SELECTED_COLUMNS].copy()
     print(f"  Selected {len(SELECTED_COLUMNS) - 1} features + target")
     return df
 
 
 # ---------------------------------------------------------------------------
-# Step 4 — Handle missing values
+# Step 4: Handle missing values
 # ---------------------------------------------------------------------------
 
 
@@ -144,7 +144,7 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     df["diag_1"] = df["diag_1"].replace("?", np.nan)
     df = df.dropna(subset=["race", "diag_1"])
 
-    # "None" in A1Cresult / max_glu_serum means the test was not performed —
+    # "None" in A1Cresult / max_glu_serum means the test was not performed
     # it is valid data. ucimlrepo may convert the string "None" to actual NaN,
     # so restore those rows as the category string "None".
     for col in ["A1Cresult", "max_glu_serum"]:
@@ -159,7 +159,7 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Step 5 — Target encoding
+# Step 5: Target encoding
 # ---------------------------------------------------------------------------
 
 
@@ -168,14 +168,14 @@ def encode_target(df: pd.DataFrame) -> pd.DataFrame:
     counts = df["readmitted"].value_counts()
     pct = counts[1] / len(df) * 100
     print(
-        f"  Target distribution — positive (<30 days): {counts[1]:,} ({pct:.1f}%), "
+        f"  Target distribution - positive (<30 days): {counts[1]:,} ({pct:.1f}%), "
         f"negative: {counts[0]:,} ({100 - pct:.1f}%)"
     )
     return df
 
 
 # ---------------------------------------------------------------------------
-# Step 6 — ICD-9 grouping
+# Step 6: ICD-9 grouping
 # ---------------------------------------------------------------------------
 
 
@@ -186,7 +186,7 @@ def group_icd9_codes(code: str) -> str:
     if code.upper().startswith("E") or code.upper().startswith("V"):
         return "Other"
 
-    # Diabetes: 250.xx — explicit prefix check must precede numeric range checks
+    # Diabetes: 250.xx - explicit prefix check must precede numeric range checks
     if code.startswith("250"):
         return "Diabetes"
 
@@ -220,7 +220,7 @@ def apply_icd9_grouping(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Step 7 — Categorical encoding
+# Step 7: Categorical encoding
 # ---------------------------------------------------------------------------
 
 
@@ -241,7 +241,7 @@ def encode_categorical_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Step 8 — Split → Scale → SMOTE
+# Step 8: Split → Scale → SMOTE
 # ---------------------------------------------------------------------------
 
 
@@ -270,11 +270,11 @@ def split_scale_oversample(df: pd.DataFrame):
     X_train.to_csv(f"{DATA_DIR}X_train_raw.csv", index=False)
     pd.Series(y_train, name="readmitted").to_csv(f"{DATA_DIR}y_train_raw.csv", index=False)
 
-    print(f"  Before SMOTE — train class balance: {y_train.value_counts().to_dict()}")
+    print(f"  Before SMOTE - train class balance: {y_train.value_counts().to_dict()}")
     smote = SMOTE(random_state=RANDOM_STATE)
     X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
     print(
-        f"  After  SMOTE — train class balance: {pd.Series(y_train_res).value_counts().to_dict()}"
+        f"  After  SMOTE - train class balance: {pd.Series(y_train_res).value_counts().to_dict()}"
     )
 
     X_train_res.to_csv(f"{DATA_DIR}X_train.csv", index=False)
